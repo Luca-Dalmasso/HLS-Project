@@ -9,4 +9,5 @@ Alessandro Landra<br>
 High Level Synthesis project for Synthesis and Optimization Of Digital Systems's HLS contest.
 <br>
 <br>
-![main script](contest.tcl)
+
+[main script](contest.tcl)
