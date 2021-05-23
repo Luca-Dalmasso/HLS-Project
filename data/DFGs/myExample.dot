@@ -1,0 +1,22 @@
+digraph myExample {
+   node [fontcolor=white,style=filled,color=blue2];
+   A [label = ADD ];
+   B [label = ADD ];
+   E [label = ADD ];
+   H1 [label = ADD ];
+   H [label = ADD ];
+   D [label = DIV ];
+   Y [label = DIV ];
+   C [label = MUL ];
+   H2 [label = ADD ];
+   O [label = MUL ];
+   A -> H1 [ name = 10 ];
+   C -> H1 [ name = 11 ];
+   B -> H2 [ name = 12 ];
+   D -> H2 [ name = 13 ];
+   E -> O [ name = 14 ];
+   H1 -> H [ name = 15 ];
+   H2 -> H [ name = 16 ];
+   H -> Y [ name = 17 ];
+   H -> O [ name = 18 ];
+}

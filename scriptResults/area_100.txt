@@ -1,0 +1,71 @@
+Time 1, scheduled N10, label: COF_17, op: LOD, resource usage: {L2 0} {L6 0} {L12 1}
+Time 6, scheduled N9, label: IN_16, op: LOD, resource usage: {L2 0} {L6 0} {L12 1}
+Time 11, scheduled N4, label: MUL_2, op: MUL, resource usage: {L2 0} {L6 1} {L12 0}
+Time 11, scheduled N8, label: COF_13, op: LOD, resource usage: {L2 0} {L6 1} {L12 1}
+Time 16, scheduled N7, label: IN_12, op: LOD, resource usage: {L2 0} {L6 1} {L12 1}
+Time 21, scheduled N3, label: MUL_0, op: MUL, resource usage: {L2 0} {L6 1} {L12 0}
+Time 21, scheduled N6, label: COF_15, op: LOD, resource usage: {L2 0} {L6 1} {L12 1}
+Time 26, scheduled N5, label: IN_14, op: LOD, resource usage: {L2 0} {L6 1} {L12 1}
+Time 31, scheduled N2, label: MUL_1, op: MUL, resource usage: {L2 0} {L6 1} {L12 0}
+Time 41, scheduled N0, label: ADD_11, op: ADD, resource usage: {L2 1} {L6 0} {L12 0}
+Time 46, scheduled N1, label: ADD_12, op: ADD, resource usage: {L2 1} {L6 0} {L12 0}
+Node: COF_17 starts @ 1
+Node: IN_16 starts @ 6
+Node: MUL_2 starts @ 11
+Node: COF_13 starts @ 11
+Node: IN_12 starts @ 16
+Node: MUL_0 starts @ 21
+Node: COF_15 starts @ 21
+Node: IN_14 starts @ 26
+Node: MUL_1 starts @ 31
+Node: ADD_11 starts @ 41
+Node: ADD_12 starts @ 46
+Latency: 50
+Time 1, scheduled N10, label: COF_17, op: LOD, resource usage: {L1 0} {L6 0} {L12 1}
+Time 6, scheduled N9, label: IN_16, op: LOD, resource usage: {L1 0} {L6 0} {L12 1}
+Time 11, scheduled N4, label: MUL_2, op: MUL, resource usage: {L1 0} {L6 1} {L12 0}
+Time 11, scheduled N8, label: COF_13, op: LOD, resource usage: {L1 0} {L6 1} {L12 1}
+Time 16, scheduled N7, label: IN_12, op: LOD, resource usage: {L1 0} {L6 1} {L12 1}
+Time 21, scheduled N3, label: MUL_0, op: MUL, resource usage: {L1 0} {L6 1} {L12 0}
+Time 21, scheduled N6, label: COF_15, op: LOD, resource usage: {L1 0} {L6 1} {L12 1}
+Time 26, scheduled N5, label: IN_14, op: LOD, resource usage: {L1 0} {L6 1} {L12 1}
+Time 31, scheduled N2, label: MUL_1, op: MUL, resource usage: {L1 0} {L6 1} {L12 0}
+Time 41, scheduled N0, label: ADD_11, op: ADD, resource usage: {L1 1} {L6 0} {L12 0}
+Time 43, scheduled N1, label: ADD_12, op: ADD, resource usage: {L1 1} {L6 0} {L12 0}
+Node: COF_17 starts @ 1
+Node: IN_16 starts @ 6
+Node: MUL_2 starts @ 11
+Node: COF_13 starts @ 11
+Node: IN_12 starts @ 16
+Node: MUL_0 starts @ 21
+Node: COF_15 starts @ 21
+Node: IN_14 starts @ 26
+Node: MUL_1 starts @ 31
+Node: ADD_11 starts @ 41
+Node: ADD_12 starts @ 43
+Latency: 44
+CYCLE: 1. Param: 0, FU 1, Area 70
+Time 1, scheduled N10, label: COF_17, op: LOD, resource usage: {L0 0} {L6 0} {L12 1}
+Time 6, scheduled N9, label: IN_16, op: LOD, resource usage: {L0 0} {L6 0} {L12 1}
+Time 11, scheduled N4, label: MUL_2, op: MUL, resource usage: {L0 0} {L6 1} {L12 0}
+Time 11, scheduled N8, label: COF_13, op: LOD, resource usage: {L0 0} {L6 1} {L12 1}
+Time 16, scheduled N7, label: IN_12, op: LOD, resource usage: {L0 0} {L6 1} {L12 1}
+Time 21, scheduled N3, label: MUL_0, op: MUL, resource usage: {L0 0} {L6 1} {L12 0}
+Time 21, scheduled N6, label: COF_15, op: LOD, resource usage: {L0 0} {L6 1} {L12 1}
+Time 26, scheduled N5, label: IN_14, op: LOD, resource usage: {L0 0} {L6 1} {L12 1}
+Time 31, scheduled N2, label: MUL_1, op: MUL, resource usage: {L0 0} {L6 1} {L12 0}
+Time 41, scheduled N0, label: ADD_11, op: ADD, resource usage: {L0 1} {L6 0} {L12 0}
+Time 42, scheduled N1, label: ADD_12, op: ADD, resource usage: {L0 1} {L6 0} {L12 0}
+Node: COF_17 starts @ 1
+Node: IN_16 starts @ 6
+Node: MUL_2 starts @ 11
+Node: COF_13 starts @ 11
+Node: IN_12 starts @ 16
+Node: MUL_0 starts @ 21
+Node: COF_15 starts @ 21
+Node: IN_14 starts @ 26
+Node: MUL_1 starts @ 31
+Node: ADD_11 starts @ 41
+Node: ADD_12 starts @ 42
+Latency: 42
+CYCLE: 2. Param: 0, FU 2, Area 90

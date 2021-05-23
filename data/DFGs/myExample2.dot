@@ -1,0 +1,24 @@
+digraph myExample2 {
+   node [fontcolor=white,style=filled,color=blue2];
+   ADD_11 [label = ADD ];
+   ADD_12 [label = ADD ]; 
+   MUL_1 [label = MUL ];
+   MUL_0 [label = MUL ];
+   MUL_2 [label = MUL ];
+   IN_14 [label = LOD ];
+   COF_15 [label = LOD ];
+   IN_12 [label = LOD ];
+   COF_13 [label = LOD ];
+   IN_16 [label = LOD ];
+   COF_17 [label = LOD ]; 
+   IN_14 -> MUL_1 [ name = 10 ];
+   COF_15 -> MUL_1 [ name = 11 ];
+   IN_12 -> MUL_0 [ name = 12 ];
+   COF_13 -> MUL_0 [ name = 13 ];
+   IN_16 -> MUL_2 [ name = 14 ];
+   COF_17 -> MUL_2 [ name = 15 ];
+   MUL_1 -> ADD_11 [ name = 16 ];
+   MUL_0 -> ADD_11 [ name = 17 ];
+   ADD_11 -> ADD_12 [ name = 18 ];
+   MUL_2 -> ADD_12 [ name = 19 ];
+}
