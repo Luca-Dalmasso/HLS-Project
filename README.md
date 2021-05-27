@@ -2,7 +2,6 @@
 
 **Authors:**<br>
 Luca Dalmasso<br>
-Gianmarco Dogliani<br>
 Alessandro Landra<br>
 
 <br>
