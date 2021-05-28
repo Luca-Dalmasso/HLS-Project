@@ -1,11 +1,10 @@
-proc list_mlac {fu_res} {
+proc list_mlac {fu_res nodes} {
 
   set node_start_time [list]
   set fu_res_used [list]
   set abs_start_time 1
   set start_time 1
-  set n [llength [get_nodes]]
-  set nodes [get_sorted_nodes]
+  set n [llength $nodes]
   set sched_nodes [list]
   set i 0
   set end_time 0

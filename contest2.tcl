@@ -12,6 +12,8 @@ set real_fus [list]
 set greedy_list [list]
 set params [list]
 set greedy_list_decreasing_delay [list]
+#our function's result
+set my_node_list [get_sorted_nodes]
 set output_dot ./data/out/contest/testcontest2.dot
 
 #all fus in the library grouped by type of op
@@ -79,7 +81,7 @@ foreach fu $real_fus {
 puts "params: $params"
 puts "greedy_list: $greedy_list"
 
-set lm_result [list_mlac $params]
+set lm_result [list_mlac $params $my_node_list]
 set start_time_list [lindex $lm_result 0]
 set latency [lindex $lm_result 1]
 foreach pair $start_time_list {
@@ -115,7 +117,7 @@ while { $cycle >= 0 } {
 		set params $p_temp
 		#set params {{LO 1 MUL} {L1 1 ADD} {L2 1 SUB} {L2 1 LOD}}
 puts "params: $params"
-		set lm_result [list_mlac $params]
+		set lm_result [list_mlac $params $my_node_list]
 		set start_time_list [lindex $lm_result 0]
 		set latency [lindex $lm_result 1]
 		foreach pair $start_time_list {
