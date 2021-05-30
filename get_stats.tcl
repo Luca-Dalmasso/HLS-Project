@@ -1,11 +1,13 @@
 #!/usr/bin/tclsh
 
-#for a given design, get all nets and compute percentage 
-#for each operation
+#given a list of nodes
+#compute the percentage of each operation in the list
+#usage example: list of nodes composing the critical path
 
-proc get_percentage {} {
+proc get_percentage nodes {
+	puts $nodes
 	set op_type [list]
-	foreach node [get_nodes] {
+	foreach node $nodes {
 		set operation [get_attribute $node operation]
 	       	if {[lsearch -index 0 $op_type $operation ] == -1} {
 			lappend op_type "$operation 1"
@@ -18,7 +20,7 @@ proc get_percentage {} {
 	}
 	
 	set index 0
-	set tot_nodes [llength [get_nodes]]
+	set tot_nodes [llength $nodes]
 	foreach item $op_type {
 		set current_stat [format "%.2f" [expr {([lindex $item 1]*100.00)/$tot_nodes}]]
 		lset op_type $index 1 $current_stat
