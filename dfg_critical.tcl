@@ -79,12 +79,12 @@ proc depth_visit_wrapper {nodes} {
 	}
 }
 
-proc get_critical_path {} {
-	lappend ::greedy_list_delay "MUL {{L6 40 10} {L5 70 5} {L4 100 2}}"
-	lappend ::greedy_list_delay "ADD {{L2 10 5} {L1 20 2} {L0 40 1}}"
-	lappend ::greedy_list_delay "LOD {{L12 10 5} {L11 20 2} {L10 40 1}}"
-	lappend ::greedy_list_delay "STR {{L15 10 5} {L14 20 2} {L13 40 1}}"
-
+#this is the main function to be called
+#input: fu_list (LIST)
+#	fu_list item = "FU {{LABEL AREA DELAY} {..}}
+	
+proc get_critical_path {fu_list} {
+	set ::greedy_list_delay $fu_list
 	set top_order [get_sorted_nodes]
 	set index 0
 	foreach node $top_order {
