@@ -58,6 +58,66 @@ proc get_levels {} {
 		lappend ::node_visited "$node 0"
 		incr index
 	}
-	return [priority_wrapper $top_order]
+	set l_nodes [priority_wrapper $top_order]
+	return [list $l_nodes [get_max_levels]]
 }
 
+
+
+proc get_max_levels {} {
+	set nodes $::node_priority
+	set current_level [lindex [lindex $nodes 0] 1]
+	set max_list [list]
+	set level_list [list]
+	foreach node $nodes {
+		#{{node priority}}
+		set op [get_attribute [lindex $node 0] operation]
+		set level [lindex $node 1]
+
+		if { $current_level != $level } {
+			set current_level $level
+			foreach lvl $level_list {
+				set lvl_op [lindex $lvl 0]
+				set lvl_max [lindex $lvl 1]
+
+				set max_idx [lsearch -index 0 $max_list $lvl_op]
+				if {$max_idx == -1} {
+					lappend max_list "$lvl_op $lvl_max"
+				} else {
+					set current_max [lindex [lindex $max_list $max_idx] 1]
+					if {$lvl_max > $current_max } {
+						lset max_list $max_idx 1 $lvl_max
+					}
+				}
+			}
+			set level_list [list]
+		}
+
+			set op_idx [lsearch -index 0 $level_list $op]
+			if {$op_idx == -1} {
+				lappend level_list "$op 1"
+			} else {
+				set current_count [lindex [lindex $level_list $op_idx] 1]
+				incr current_count
+				lset level_list $op_idx 1 $current_count
+			}
+	}
+			set current_level $level
+			foreach lvl $level_list {
+				set lvl_op [lindex $lvl 0]
+				set lvl_max [lindex $lvl 1]
+
+				set max_idx [lsearch -index 0 $max_list $lvl_op]
+				if {$max_idx == -1} {
+					lappend max_list "$lvl_op $lvl_max"
+				} else {
+					set current_max [lindex [lindex $max_list $max_idx] 1]
+					if {$lvl_max > $current_max } {
+						lset max_list $max_idx 1 $lvl_max
+					}
+				}
+			}
+			set level_list [list]
+
+	return $max_list
+}

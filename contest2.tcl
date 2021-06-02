@@ -11,7 +11,9 @@ source ./get_graph_levels.tcl
 set output_dot ./data/out/contest/testcontest2.dot
 
 set topological_node_list [get_sorted_nodes]
-set level_node_list [get_levels]
+set levels_result [get_levels]
+set level_node_list [lindex $levels_result 0]
+set max_number_units [lindex $levels_result 1]
 
 #select the desired node order
 #set my_node_list $topological_node_list
@@ -68,6 +70,7 @@ proc prepare_fu_list {} {
 proc get_total_scheduling {} {
 	global my_node_list
 	global output_dot
+	global max_number_units
 
 	set ret ""
 	set p_result [prepare_fu_list]
@@ -99,41 +102,52 @@ proc get_total_scheduling {} {
 	append ret "FIRST RUN (WORST CASE LATENCY): $latency, AREA(the minimum one): $area"
 
 	set feasibility 1
-	set max_area 150
+	set max_area 500
 	set index_greedy -1
 	set cycle 1
 
+#	set arr {{"MUL" 3} {"ADD" 2} {"STR" 1} {"LOD" 6}}
+
+
 	while { $cycle >= 0 } {
-		set area 0
-		set p_temp $params
+
 		if {[llength $greedy_list] >  [expr {$index_greedy + 1}]} {
 			incr index_greedy
 		} else {
 			break
 		}
+
+		set p_temp $params
 		set g_op [lindex [lindex $greedy_list $index_greedy] 3]
 		set g_fu [lindex [lindex $greedy_list $index_greedy] 0]
-		#find the index of the operation to replace
 		set index_param [lsearch -index 2 $params $g_op]
 		lset p_temp $index_param 0 $g_fu
-		foreach fu $p_temp {
-			set area [expr {$area + [get_attribute [lindex $fu 0] area]} ]
-		}
-		if {$area <= $max_area } {
-			set params $p_temp
-			#set params {{LO 1 MUL} {L1 1 ADD} {L2 1 SUB} {L2 1 LOD}}
-			append ret "\nparams: $params"
-			set lm_result [list_mlac $params $my_node_list]
-			set start_time_list [lindex $lm_result 0]
-			set latency [lindex $lm_result 1]
-			foreach pair $start_time_list {
-				set node_id [lindex $pair 0]
-				set start_time [lindex $pair 1]
-				#puts "Node: [get_attribute $node_id label] starts @ $start_time"
+		set arr_idx [lsearch -index 0 $max_number_units $g_op]
+
+#		for {set i 1} {$i <= [lindex [lindex $max_number_units $arr_idx] 1]} {incr i} 
+		for {set i 1} {$i <= 2} {incr i} {
+			set area 0
+			#find the index of the operation to replace
+			lset p_temp $index_param 1 $i
+			foreach fu $p_temp {
+				set area [expr {$area + [expr [lindex $fu 1]*[get_attribute [lindex $fu 0] area]]} ]
 			}
-			append ret "\nLatency: $latency, AREA: $area"
+			if {$area <= $max_area } {
+				set params $p_temp
+				#set params {{LO 1 MUL} {L1 1 ADD} {L2 1 SUB} {L2 1 LOD}}
+				append ret "\nparams: $params"
+				set lm_result [list_mlac $params $my_node_list]
+				set start_time_list [lindex $lm_result 0]
+				set latency [lindex $lm_result 1]
+				foreach pair $start_time_list {
+					set node_id [lindex $pair 0]
+					set start_time [lindex $pair 1]
+					#puts "Node: [get_attribute $node_id label] starts @ $start_time"
+				}
+				append ret "\nLatency: $latency, AREA: $area"
+			}
+			incr cycle
 		}
-		incr cycle
 	}
 
 	print_dfg $output_dot
