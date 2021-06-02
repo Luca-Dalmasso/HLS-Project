@@ -82,8 +82,17 @@ proc depth_visit_wrapper {nodes} {
 #this is the main function to be called
 #input: fu_list (LIST)
 #	fu_list item = "FU {{LABEL AREA DELAY} {..}}
+
+proc reset {} {
+	set ::distance 0
+	set ::node_visited ""
+	set ::tmp_path ""
+	set ::critical_path ""
+	set ::greedy_list_delay ""
+}
 	
 proc get_critical_path {fu_list} {
+	reset
 	set ::greedy_list_delay $fu_list
 	set top_order [get_sorted_nodes]
 	set index 0
@@ -91,14 +100,11 @@ proc get_critical_path {fu_list} {
 		lappend ::node_visited "$node 0"
 		incr index
 	}
-
 	depth_visit_wrapper $top_order
-
 	puts "NODE, DISTANCE FROM SINK"
 	foreach item $::critical_path {
 		puts "[get_attribute [lindex $item 0] label] [lindex $item 1]"
-	}
-	
+	}	
 	return $::critical_path
 }
 
