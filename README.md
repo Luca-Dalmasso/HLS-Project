@@ -10,4 +10,4 @@ High Level Synthesis project for Synthesis and Optimization Of Digital Systems's
 <br>
 <br>
 
-[main script](contest.tcl)
+[main script](contest2.tcl)

@@ -49,8 +49,14 @@ proc priority_wrapper {nodes} {
 	return $node_list
 }
 
+proc reset {} {
+	set ::distance 0
+	set ::node_priority ""
+	set ::node_visited ""
+}
 
 proc get_levels {} {
+	reset
 	set top_order [get_sorted_nodes]
 	set index 0
 	foreach node $top_order {
