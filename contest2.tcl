@@ -51,8 +51,7 @@ proc prepare_fu_list {} {
 			set idx2 [lsearch $fus [list $op *]]
 			if {$idx2<0} {
 				puts "error, no fu found to execute $op"
-#SEE...how to exit
-				return
+				exit 2
 			}
 			lappend real_fus [lindex $fus $idx2]
 			foreach fu [lindex [lindex $fus $idx2] 1] {
@@ -106,9 +105,6 @@ proc get_total_scheduling {} {
 	set index_greedy -1
 	set cycle 1
 
-#	set arr {{"MUL" 3} {"ADD" 2} {"STR" 1} {"LOD" 6}}
-
-
 	while { $cycle >= 0 } {
 
 		if {[llength $greedy_list] >  [expr {$index_greedy + 1}]} {
@@ -124,8 +120,7 @@ proc get_total_scheduling {} {
 		lset p_temp $index_param 0 $g_fu
 		set arr_idx [lsearch -index 0 $max_number_units $g_op]
 
-#		for {set i 1} {$i <= [lindex [lindex $max_number_units $arr_idx] 1]} {incr i} 
-		for {set i 1} {$i <= 2} {incr i} {
+		for {set i 1} {$i <= [lindex [lindex $max_number_units $arr_idx] 1]} {incr i} {
 			set area 0
 			#find the index of the operation to replace
 			lset p_temp $index_param 1 $i
