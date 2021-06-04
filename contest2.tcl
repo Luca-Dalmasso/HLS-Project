@@ -1,10 +1,3 @@
-#!/usr/bin/tclsh
-
-#source ./tcl_scripts/setenv.tcl
-#remove_library
-#remove_design
-#read_design ./data/DFGs/fir.dot
-#read_library ./data/RTL_libraries/RTL_lib_2.txt
 source ./tcl_scripts/scheduling/list_mlac_contest.tcl
 source ./get_graph_levels.tcl
 
@@ -71,6 +64,9 @@ proc get_total_scheduling {} {
 	global output_dot
 	global max_number_units
 
+	#taken from the outside
+	set max_area 500
+
 	set ret ""
 	set p_result [prepare_fu_list]
 	set real_fus [lindex $p_result 0]
@@ -83,9 +79,6 @@ proc get_total_scheduling {} {
 		set smallest_fu [lindex [lindex [lindex $fu 1] 0] 0]
 		lappend params [list $smallest_fu 1 $op]
 		set area [expr {$area + [get_attribute $smallest_fu area]} ]
-		#remove from greedy list already scheduled op
-		set g_idx [lsearch -index 0 $greedy_list $smallest_fu]
-		set greedy_list [lreplace $greedy_list $g_idx $g_idx]
 	}
 	append ret "executing with $greedy_list\n"
 	append ret "params: $params\n"
@@ -93,59 +86,56 @@ proc get_total_scheduling {} {
 	set lm_result [list_mlac $params $my_node_list]
 	set start_time_list [lindex $lm_result 0]
 	set latency [lindex $lm_result 1]
-	foreach pair $start_time_list {
-		set node_id [lindex $pair 0]
-		set start_time [lindex $pair 1]
-		#puts "Node: [get_attribute $node_id label] starts @ $start_time"
-	}
 	append ret "FIRST RUN (WORST CASE LATENCY): $latency, AREA(the minimum one): $area"
 
 	set feasibility 1
-	set max_area 500
 	set index_greedy -1
 	set cycle 1
 
 	while { $cycle >= 0 } {
-
 		if {[llength $greedy_list] >  [expr {$index_greedy + 1}]} {
 			incr index_greedy
 		} else {
 			break
 		}
-
-		set p_temp $params
 		set g_op [lindex [lindex $greedy_list $index_greedy] 3]
 		set g_fu [lindex [lindex $greedy_list $index_greedy] 0]
 		set index_param [lsearch -index 2 $params $g_op]
+		set p_temp $params
 		lset p_temp $index_param 0 $g_fu
-		set arr_idx [lsearch -index 0 $max_number_units $g_op]
+		set max_idx [lsearch -index 0 $max_number_units $g_op]
 
-		for {set i 1} {$i <= [lindex [lindex $max_number_units $arr_idx] 1]} {incr i} {
+		for {set i 1} {$i <= [lindex [lindex $max_number_units $max_idx] 1]} {incr i} {
 			set area 0
-			#find the index of the operation to replace
+			#replace the old fu with the new one (or with the same but with an increased # of resources)
 			lset p_temp $index_param 1 $i
 			foreach fu $p_temp {
 				set area [expr {$area + [expr [lindex $fu 1]*[get_attribute [lindex $fu 0] area]]} ]
 			}
 			if {$area <= $max_area } {
 				set params $p_temp
-				#set params {{LO 1 MUL} {L1 1 ADD} {L2 1 SUB} {L2 1 LOD}}
 				append ret "\nparams: $params"
 				set lm_result [list_mlac $params $my_node_list]
-				set start_time_list [lindex $lm_result 0]
 				set latency [lindex $lm_result 1]
-				foreach pair $start_time_list {
-					set node_id [lindex $pair 0]
-					set start_time [lindex $pair 1]
-					#puts "Node: [get_attribute $node_id label] starts @ $start_time"
-				}
 				append ret "\nLatency: $latency, AREA: $area"
 			}
 			incr cycle
 		}
 	}
-
+	set node_fu_list [list]
+	foreach node [get_nodes] {
+		set index_param [lsearch -index 2 $params [get_attribute $node operation]]
+		lappend node_fu_list [list $node [lindex [lindex $params $index_param] 0]]
+	}
+	set fu_res_list [list]
+	foreach p $params {
+		lappend fu_res_list [list [lindex $p 0] [lindex $p 1]]
+	}
+	#last list_scheduling result
+	set start_time_list [lindex $lm_result 0]
+	append ret "\nnode start time:\n$start_time_list \nnode fu:\n$node_fu_list \nfu # of resources:\n$fu_res_list"
 	print_dfg $output_dot
 	print_scheduled_dfg $start_time_list $output_dot
+	#return $start_time_list $node_fu_list $fu_res_list
 	return $ret
 }
