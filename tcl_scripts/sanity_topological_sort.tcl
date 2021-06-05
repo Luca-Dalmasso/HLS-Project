@@ -1,5 +1,5 @@
-proc sanity {} {
-  set sorted_nodes [get_sorted_nodes]
+proc sanity {nodes} {
+  set sorted_nodes $nodes
   set flag 0
   for {set i 0} { $i < [llength $sorted_nodes] } { incr i } {
     set node [lindex $sorted_nodes $i]
