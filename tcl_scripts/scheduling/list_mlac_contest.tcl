@@ -40,7 +40,7 @@ proc list_mlac {fu_res nodes} {
 				set nodeIdx [lsearch $nodes $node]
 				set nodes [lreplace $nodes $nodeIdx $nodeIdx]
 				incr i
-#puts "Time $start_time, scheduled $node, label: $lbl, op: $op, resource usage: $fu_res_used"
+puts "Time $start_time, scheduled $node, label: $lbl, op: $op, resource usage: $fu_res_used"
 				lappend sched_nodes $node
 				set endTimeTmp [expr $start_time + $duration ]
 				if {$endTimeTmp > $end_time } {
@@ -70,7 +70,7 @@ proc list_mlac {fu_res nodes} {
   		set ts [lsearch $node_start_time [list $node *]]
   		if {$ts>=0} {
 			set ts [lindex [lindex $node_start_time $ts] 1]
-#puts "already scheduled node $node, ts: $ts, end: [expr $ts + $duration]"
+puts "already scheduled node $node, ts: $ts, end: [expr $ts + $duration]"
 			if {$start_time == [expr $ts + $duration]} {
 				set tmpRes [lindex [lindex $fu_res_used $fuIdx] 1]
 #puts "fuIdx: $fuIdx, tmpRes: $tmpRes"

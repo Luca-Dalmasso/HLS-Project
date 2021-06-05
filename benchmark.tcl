@@ -7,61 +7,37 @@ source ./tcl_scripts/sanity_topological_sort.tcl
 #testing for RTL library 2
 read_library ./data/RTL_libraries/RTL_lib_2.txt
 #sourcing MAIN script
-read_design ./data/DFGs/fir.dot
-source ./contest2.tcl
+source ./braveOpt.tcl
 
+set path_list [list arf.dot collapse_pyr_dfg__113.dot ewf.dot feedback_points_dfg__7.dot fir.dot h2v2_smooth_downsample_dfg__6.dot horner_bezier_surf_dfg__12.dot idctcol_dfg__3.dot interpolate_aux_dfg__12.dot invert_matrix_general_dfg__3.dot jpeg_fdct_islow_dfg__6.dot jpeg_idct_ifast_dfg__6.dot matmul_dfg__3.dot motion_vectors_dfg__7.dot smooth_color_z_triangle_dfg__31.dot write_bmp_header_dfg__7.dot]
 
-#TEST 3, matmul_dfg__3
-remove_design
-read_design ./data/DFGs/matmul_dfg__3.dot
-set max_area 500
-puts "\n\nMATMUL\n\n"
-set ret [get_total_scheduling $max_area]
-puts "[lindex $ret 0]"
-#sanity checks
-set nodes_scheduled ""
-foreach item [lindex $ret 0] {
-	lappend nodes_scheduled [lindex $item 0]
+proc do_things {path} {
+	puts "NEW DFG: $path\n\n"
+	catch {remove_design}
+	read_design $path
+	set max_area 195
+	set clk_start [clock clicks]
+	set ret [brave_opt -total_area $max_area]
+	puts "execution time: [expr [clock clicks] - $clk_start] us"
+	puts "[lindex $ret 0]"
+	foreach fu_line [lindex $ret 1] {
+		set node_op [get_attribute [lindex $fu_line 0] operation]
+		set fu_op [get_attribute [lindex $fu_line 1] operation]
+		if {$node_op != $fu_op } {
+			puts "*****************************************ERROR*************************************"
+		}
+	}
+
+	#sanity checks
+	set nodes_scheduled ""
+	foreach item [lindex $ret 0] {
+		lappend nodes_scheduled [lindex $item 0]
+	}
+	puts "[sanity $nodes_scheduled]"
+	set levels [lindex [get_levels] 0]
+	puts "[sanity $levels]\n\n"
 }
-puts "[sanity $nodes_scheduled]"
-set levels [lindex [get_levels] 0]
-puts "[sanity $levels]"
-print_dfg ./data/out/contest/test_matmul_dfg__3.dot
-print_scheduled_dfg [lindex $ret 0] ./data/out/contest/test_matmul_dfg__3.dot
-#TEST 1, FIR
-remove_design
-read_design ./data/DFGs/fir.dot
-set max_area 200
-puts "\n\nFIR\n\n"
-set ret [get_total_scheduling $max_area]
-puts "[lindex $ret 0]"
-#sanity checks
-set nodes_scheduled ""
-foreach item [lindex $ret 0] {
-	lappend nodes_scheduled [lindex $item 0]
+
+foreach i $path_list {
+	do_things "./data/DFGs/$i"
 }
-puts "[sanity $nodes_scheduled]"
-set levels [lindex [get_levels] 0]
-puts "[sanity $levels]"
-print_dfg ./data/out/contest/test_fir.dot
-print_scheduled_dfg [lindex $ret 0] ./data/out/contest/test_fir.dot
-
-#TEST 2, motion_vector
-remove_design
-read_design ./data/DFGs/motion_vectors_dfg__7.dot
-set max_area 500
-puts "\n\nMOTION\n\n"
-set ret [get_total_scheduling $max_area]
-puts "[lindex $ret 0]"
-
-#sanity checks
-set nodes_scheduled ""
-foreach item [lindex $ret 0] {
-	lappend nodes_scheduled [lindex $item 0]
-}
-puts "[sanity $nodes_scheduled]"
-set levels [lindex [get_levels] 0]
-puts "[sanity $levels]"
-print_dfg ./data/out/contest/test_motion_vectors_dfg__7.dot
-print_scheduled_dfg [lindex $ret 0] ./data/out/contest/test_motion_vectors_dfg__7.dot
-

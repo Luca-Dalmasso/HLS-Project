@@ -1,6 +1,5 @@
-source ./tcl_scripts/scheduling/list_mlac_contest.tcl
-source ./get_graph_levels.tcl
-
+variable distance 0
+variable node_visited [list]
 
 proc prepare_fu_list {} {
 	set fus [list]
@@ -50,22 +49,18 @@ proc prepare_fu_list {} {
 
 proc get_total_scheduling {max_area} {
 
+	set clk_start [clock clicks]
+
 	set levels_result [get_levels]
 	set level_node_list [lindex $levels_result 0]
 	set max_number_units [lindex $levels_result 1]
 
-	#select the desired node order
-	#set my_node_list $topological_node_list
-	set my_node_list $level_node_list
-
-
-	set ret ""
 	set p_result [prepare_fu_list]
 	set real_fus [lindex $p_result 0]
 	set greedy_list [lindex $p_result 1]
 	set params [list]
 	set area 0
-puts "get_total_scheduling: $max_area"	
+	#puts "get_total_scheduling: $max_area"
 	#prepare params for the first run
 	foreach fu $real_fus {
 		set op [lindex $fu 0]
@@ -73,14 +68,11 @@ puts "get_total_scheduling: $max_area"
 		lappend params [list $smallest_fu 1 $op]
 		set area [expr {$area + [get_attribute $smallest_fu area]} ]
 	}
-	append ret "executing with $greedy_list\n"
-	append ret "params: $params\n"
-#puts $ret
-	set lm_result [list_mlac $params $my_node_list]
+	#puts "executing with $greedy_list\n"
+	#puts "params: $params\n"
+	set lm_result [list_mlac $params $level_node_list]
 	set start_time_list [lindex $lm_result 0]
 	set latency [lindex $lm_result 1]
-	append ret "FIRST RUN (WORST CASE LATENCY): $latency, AREA(the minimum one): $area"
-#puts $ret
 	set feasibility 1
 	set index_greedy -1
 	set cycle 1
@@ -107,14 +99,13 @@ puts "get_total_scheduling: $max_area"
 			}
 			if {$area <= $max_area } {
 				set params $p_temp
-				append ret "\nparams: $params"
-				set lm_result [list_mlac $params $my_node_list]
+				#puts "\nparams: $params"
+				set lm_result [list_mlac $params $level_node_list]
 				set latency [lindex $lm_result 1]
-				append ret "\nLatency: $latency, AREA: $area"
+				#puts "\nLatency: $latency, AREA: $area"
 			}
 			incr cycle
 		}
-#puts $ret
 	}
 	set node_fu_list [list]
 	foreach node [get_nodes] {
@@ -127,7 +118,213 @@ puts "get_total_scheduling: $max_area"
 	}
 	#last list_scheduling result
 	set start_time_list [lindex $lm_result 0]
-	append ret "\nnode start time:\n$start_time_list \nnode fu:\n$node_fu_list \nfu # of resources:\n$fu_res_list"
-	puts $ret
+
+	puts "execution time: [expr [clock clicks] - $clk_start] us"
+
 	return [list $start_time_list $node_fu_list $fu_res_list]
+}
+
+proc depth_visit node {
+	set nodeINDEX [lsearch -index 0 $::node_priority $node]
+	foreach parent [get_attribute $node parents] {
+		set ::distance [expr {$::distance + 1}]
+		depth_visit $parent
+		set ::distance [expr {$::distance - 1}]
+	}
+	if {$nodeINDEX == -1} {
+		lappend ::node_priority "$node $::distance"
+	} else {
+		if {$::distance > [lindex [lindex $::node_priority $nodeINDEX] 1]} {
+			set ::node_priority [lreplace $::node_priority $nodeINDEX $nodeINDEX "$node $::distance"]
+		}
+	}
+}
+
+proc get_sinks nodes {
+	set sinks [list]
+	foreach node $nodes {
+		if {[llength [get_attribute $node children]] == 0} {
+			lappend sinks $node
+		}
+	}
+	return $sinks
+}
+
+proc priority_wrapper {nodes} {
+	set sinks [get_sinks $nodes]
+	foreach sink $sinks {
+		set ::distance 0
+		depth_visit $sink
+		set ::node_priority [lsort -index 1 -integer -decreasing $::node_priority]
+	}
+	set node_list [list]
+	foreach node $::node_priority {
+		lappend node_list [lindex $node 0]
+	}
+	return $node_list
+}
+
+proc reset {} {
+	set ::distance 0
+	set ::node_priority ""
+}
+
+proc get_levels {} {
+	reset
+	set top_order [get_sorted_nodes]
+	set index 0
+	foreach node $top_order {
+		lappend ::node_priority "$node 0"
+		incr index
+	}
+	set l_nodes [priority_wrapper $top_order]
+	return [list $l_nodes [get_max_levels]]
+}
+
+proc get_max_levels {} {
+	set nodes $::node_priority
+	set current_level [lindex [lindex $nodes 0] 1]
+	set max_list [list]
+	set level_list [list]
+	foreach node $nodes {
+		#{{node priority}}
+		set op [get_attribute [lindex $node 0] operation]
+		set level [lindex $node 1]
+
+		if { $current_level != $level } {
+			set current_level $level
+			foreach lvl $level_list {
+				set lvl_op [lindex $lvl 0]
+				set lvl_max [lindex $lvl 1]
+
+				set max_idx [lsearch -index 0 $max_list $lvl_op]
+				if {$max_idx == -1} {
+					lappend max_list "$lvl_op $lvl_max"
+				} else {
+					set current_max [lindex [lindex $max_list $max_idx] 1]
+					if {$lvl_max > $current_max } {
+						lset max_list $max_idx 1 $lvl_max
+					}
+				}
+			}
+			set level_list [list]
+		}
+
+			set op_idx [lsearch -index 0 $level_list $op]
+			if {$op_idx == -1} {
+				lappend level_list "$op 1"
+			} else {
+				set current_count [lindex [lindex $level_list $op_idx] 1]
+				incr current_count
+				lset level_list $op_idx 1 $current_count
+			}
+	}
+			set current_level $level
+			foreach lvl $level_list {
+				set lvl_op [lindex $lvl 0]
+				set lvl_max [lindex $lvl 1]
+
+				set max_idx [lsearch -index 0 $max_list $lvl_op]
+				if {$max_idx == -1} {
+					lappend max_list "$lvl_op $lvl_max"
+				} else {
+					set current_max [lindex [lindex $max_list $max_idx] 1]
+					if {$lvl_max > $current_max } {
+						lset max_list $max_idx 1 $lvl_max
+					}
+				}
+			}
+			set level_list [list]
+
+	return $max_list
+}
+
+proc list_mlac {fu_res nodes} {
+
+  set node_start_time [list]
+  set fu_res_used [list]
+  set abs_start_time 1
+  set start_time 1
+  set n [llength $nodes]
+  set sched_nodes [list]
+  set i 0
+  set end_time 0
+
+  foreach fu $fu_res {
+	lappend fu_res_used [list [lindex $fu 0] 0]
+  }
+
+  while { $i<$n } {
+	set fuIdx 0
+	foreach fu_row $fu_res {
+		set fu [lindex $fu_row 0]
+		set op [get_attribute $fu operation]
+#puts "op: $op"
+		set duration [get_attribute $fu delay]
+		set res [lindex $fu_row 1]
+		foreach node $nodes {
+			set nodeOp [get_attribute $node operation]
+			set lbl [get_attribute $node label]
+			set resUsed [lindex [lindex $fu_res_used $fuIdx] 1]
+#puts "NODE: $node, nodeOp: $nodeOp, op: $op, res: $res, resUsed: $resUsed"
+
+			set sched 1
+			foreach par [get_attribute $node parents] {
+				if {[lsearch $nodes $par]>=0 || [lsearch $sched_nodes $par]>=0 } {
+					set sched 0
+				}
+			}
+
+			if {[string equal $nodeOp $op] && $sched==1 && $res>$resUsed } {
+				set fu_res_used [lreplace $fu_res_used $fuIdx $fuIdx [list $fu [expr $resUsed + 1]]]
+				lappend node_start_time [list $node $start_time]
+				set nodeIdx [lsearch $nodes $node]
+				set nodes [lreplace $nodes $nodeIdx $nodeIdx]
+				incr i
+#puts "Time $start_time, scheduled $node, label: $lbl, op: $op, resource usage: $fu_res_used"
+				lappend sched_nodes $node
+				set endTimeTmp [expr $start_time + $duration ]
+				if {$endTimeTmp > $end_time } {
+					set end_time $endTimeTmp
+				}
+			}
+		}
+		incr fuIdx
+	}
+	incr start_time
+#puts "st increment $start_time"
+#puts "scheduled nodes:"
+	foreach node $sched_nodes {
+		set nodeOp [get_attribute $node operation]
+#puts "$node ($nodeOp)"
+		set idxx 0
+		foreach fu_row $fu_res {
+			set fu [lindex $fu_row 0]
+			set fu_op [get_attribute $fu operation]
+			if {$fu_op eq $nodeOp } {
+				set duration [get_attribute $fu delay]
+				set fuIdx $idxx
+				break
+			}
+			incr idxx
+		}
+  		set ts [lsearch $node_start_time [list $node *]]
+  		if {$ts>=0} {
+			set ts [lindex [lindex $node_start_time $ts] 1]
+#puts "already scheduled node $node, ts: $ts, end: [expr $ts + $duration]"
+			if {$start_time == [expr $ts + $duration]} {
+				set tmpRes [lindex [lindex $fu_res_used $fuIdx] 1]
+#puts "fuIdx: $fuIdx, tmpRes: $tmpRes"
+				set fu_res_used [lreplace $fu_res_used $fuIdx $fuIdx [list $fu [expr $tmpRes - 1]]]
+				set nodeIdx [lsearch $sched_nodes $node]
+				set sched_nodes [lreplace $sched_nodes $nodeIdx $nodeIdx]
+			}
+		}
+
+	}
+
+  }
+
+  return [list $node_start_time [expr $end_time - $abs_start_time]]
+
 }
