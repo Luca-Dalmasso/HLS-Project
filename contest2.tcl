@@ -1,17 +1,6 @@
 source ./tcl_scripts/scheduling/list_mlac_contest.tcl
 source ./get_graph_levels.tcl
 
-set output_dot ./data/out/contest/testcontest2.dot
-
-set topological_node_list [get_sorted_nodes]
-set levels_result [get_levels]
-set level_node_list [lindex $levels_result 0]
-set max_number_units [lindex $levels_result 1]
-
-#select the desired node order
-#set my_node_list $topological_node_list
-set my_node_list $level_node_list
-
 
 proc prepare_fu_list {} {
 	set fus [list]
@@ -59,13 +48,16 @@ proc prepare_fu_list {} {
 	return [list $real_fus $greedy_list_decreasing_delay]
 }
 
-proc get_total_scheduling {} {
-	global my_node_list
-	global output_dot
-	global max_number_units
+proc get_total_scheduling {max_area} {
 
-	#taken from the outside
-	set max_area 500
+	set levels_result [get_levels]
+	set level_node_list [lindex $levels_result 0]
+	set max_number_units [lindex $levels_result 1]
+
+	#select the desired node order
+	#set my_node_list $topological_node_list
+	set my_node_list $level_node_list
+
 
 	set ret ""
 	set p_result [prepare_fu_list]
@@ -73,6 +65,7 @@ proc get_total_scheduling {} {
 	set greedy_list [lindex $p_result 1]
 	set params [list]
 	set area 0
+puts "get_total_scheduling: $max_area"	
 	#prepare params for the first run
 	foreach fu $real_fus {
 		set op [lindex $fu 0]
@@ -82,12 +75,12 @@ proc get_total_scheduling {} {
 	}
 	append ret "executing with $greedy_list\n"
 	append ret "params: $params\n"
-
+#puts $ret
 	set lm_result [list_mlac $params $my_node_list]
 	set start_time_list [lindex $lm_result 0]
 	set latency [lindex $lm_result 1]
 	append ret "FIRST RUN (WORST CASE LATENCY): $latency, AREA(the minimum one): $area"
-
+#puts $ret
 	set feasibility 1
 	set index_greedy -1
 	set cycle 1
@@ -121,6 +114,7 @@ proc get_total_scheduling {} {
 			}
 			incr cycle
 		}
+#puts $ret
 	}
 	set node_fu_list [list]
 	foreach node [get_nodes] {
@@ -134,8 +128,6 @@ proc get_total_scheduling {} {
 	#last list_scheduling result
 	set start_time_list [lindex $lm_result 0]
 	append ret "\nnode start time:\n$start_time_list \nnode fu:\n$node_fu_list \nfu # of resources:\n$fu_res_list"
-	print_dfg $output_dot
-	print_scheduled_dfg $start_time_list $output_dot
-	#return $start_time_list $node_fu_list $fu_res_list
-	return $ret
+	puts $ret
+	return [list $start_time_list $node_fu_list $fu_res_list]
 }
