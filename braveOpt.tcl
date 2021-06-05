@@ -12,13 +12,6 @@ proc brave_opt args {
   set total_area $options(-total_area)
 
   puts $total_area
-  
-	source contest2.tcl
-	get_total_scheduling
-
-	#################################
-	### INSERT YOUR COMMANDS HERE ###
-	#################################
-
-	return
+  source contest2.tcl
+  return [get_total_scheduling $total_area]
 }
