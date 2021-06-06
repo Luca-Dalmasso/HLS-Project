@@ -2,6 +2,7 @@
 
 source ./tcl_scripts/setenv.tcl
 source ./tcl_scripts/sanity_topological_sort.tcl
+source ./tcl_scripts/scheduling/asap.tcl
 
 
 #testing for RTL library 2
@@ -15,7 +16,7 @@ proc do_things {path} {
 	puts "NEW DFG: $path\n\n"
 	catch {remove_design}
 	read_design $path
-	set max_area 195
+	set max_area 500000
 	set clk_start [clock clicks]
 	set ret [brave_opt -total_area $max_area]
 	puts "execution time: [expr [clock clicks] - $clk_start] us"
@@ -28,14 +29,20 @@ proc do_things {path} {
 		}
 	}
 
+	puts "\nlast scheduled node: [lindex [lindex $ret 0] [expr [llength [lindex $ret 0]] - 1]]"
+
+	set asap_result [asap]
+	set asap_result [lsort -integer -decreasing -index 1 $asap_result]
+	puts "ASAP last scheduled node: [lindex $asap_result 0]\n"
+
 	#sanity checks
 	set nodes_scheduled ""
 	foreach item [lindex $ret 0] {
 		lappend nodes_scheduled [lindex $item 0]
 	}
-	puts "[sanity $nodes_scheduled]"
+	puts "sanity nodes_scheduled: [sanity $nodes_scheduled]"
 	set levels [lindex [get_levels] 0]
-	puts "[sanity $levels]\n\n"
+	puts "sanity levels: [sanity $levels]\n\n"
 }
 
 foreach i $path_list {
