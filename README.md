@@ -10,4 +10,5 @@ High Level Synthesis project for Synthesis and Optimization Of Digital Systems's
 <br>
 <br>
 
-[main script](contest2.tcl)
+[main script](braveOpt.tcl)
+[report](braveOpt_group_6.pdf)
